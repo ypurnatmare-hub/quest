@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симулятор стажировки: Неделя 1</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-yellow: #facc15;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Header & Stats */
+        .header { margin-bottom: 24px; }
+        .header h1 { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .stats-container { display: flex; align-items: center; gap: 12px; }
+        .stats-label { font-size: 14px; color: var(--text-muted); width: 80px; }
+        .progress-bar-bg { flex-grow: 1; height: 8px; background-color: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; width: 50%; background-color: var(--accent-blue); transition: width 0.5s ease, background-color 0.5s ease; border-radius: 4px; }
+
+        /* Content Area */
+        .content { min-height: 300px; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        .message-box {
+            background-color: rgba(255,255,255,0.03);
+            border-left: 4px solid var(--accent-blue);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .message-author { font-weight: 700; color: var(--accent-blue); margin-bottom: 8px; display: block; font-size: 13px; text-transform: uppercase; }
+
+        /* Options */
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn {
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-family);
+        }
+        .option-btn:hover { background-color: rgba(255,255,255,0.1); border-color: var(--accent-blue); transform: translateY(-2px); }
+
+        /* Result Screen */
+        .result-screen { display: none; text-align: center; animation: fadeIn 0.4s ease; }
+        .result-icon { font-size: 48px; margin-bottom: 16px; }
+        .result-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+        .result-text { font-size: 15px; line-height: 1.6; color: var(--text-muted); margin-bottom: 24px; }
+        
+        .action-btn {
+            background-color: var(--accent-blue);
+            color: var(--bg-color);
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-family: var(--font-family);
+        }
+        .action-btn:hover { opacity: 0.9; }
+        .action-btn.secondary { background-color: transparent; border: 1px solid var(--text-muted); color: var(--text-main); margin-left: 12px; }
+
+        /* Utility */
+        .hidden { display: none !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Header -->
+    <div class="header">
+        <h1>Симулятор стажировки</h1>
+        <div class="stats-container">
+            <span class="stats-label">Энергия:</span>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="energy-bar"></div>
+            </div>
+            <span class="stats-label" id="energy-text" style="text-align: right;">50%</span>
+        </div>
+    </div>
+
+    <!-- Scenario Screen -->
+    <div class="content" id="scenario-screen">
+        <div class="message-box">
+            <span class="message-author">📩 Наставник (Telegram)</span>
+            Привет! Чтобы пройти на следующий этап стажировки в студии, тебе нужно за сегодня: 
+            1) Написать ТЗ для 3D-художника на 4 страницы. 
+            2) Сбалансировать характеристики 10 персонажей в Excel. 
+            3) Протестировать билд и завести 5 баг-репортов в Jira. Жду к вечеру! 🚀
+        </div>
+
+        <div class="options-grid">
+            <button class="option-btn" onclick="makeChoice('A')">
+                <strong>🎨 Путь Хайпа:</strong> Я же Геймдизайнер! Буду рисовать концепты и придумывать лор, а таблицы и баги проигнорирую. Главное — креатив!
+            </button>
+            <button class="option-btn" onclick="makeChoice('B')">
+                <strong>🚪 Путь Отказа:</strong> Это слишком скучно, похоже на обычную школу. Удаляю курс, пойду лучше в блогеры или стримеры.
+            </button>
+            <button class="option-btn" onclick="makeChoice('C')">
+                <strong> Путь Стратегии:</strong> Мне не нравится рисовать, но я кайфую от таблиц и поиска логических ошибок. Предложу наставнику сфокусироваться на балансе и тестировании.
+            </button>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="content result-screen" id="result-screen">
+        <div class="result-icon" id="result-icon">💥</div>
+        <div class="result-title" id="result-title">Заголовок результата</div>
+        <div class="result-text" id="result-text">Текст обратной связи.</div>
+        
+        <div style="display: flex; justify-content: center; gap: 12px;">
+            <button class="action-btn secondary" onclick="resetScenario()">↺ Перемотать время</button>
+            <button class="action-btn" id="final-btn" onclick="alert('Здесь будет ссылка на скачивание шаблона Профессиональной Гипотезы!')">Забрать гипотезу</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Data for outcomes
+    const outcomes = {
+        A: {
+            icon: "🔋",
+            title: "Выгорание на старте",
+            text: "Ты выбрал маркетинговый образ профессии, а не её реальность. Художник не может работать без ТЗ, баги не заведены. Наставник: «Мы не можем взять тебя в штат». Работодатель покупает решение рутины, а не только креатив.",
+            energy: 0,
+            color: "var(--accent-red)",
+            showFinalBtn: false
+        },
+        B: {
+            icon: "",
+            title: "Упущенная возможность",
+            text: "Ты спутал нелюбовь к конкретной задаче с нелюбовью ко всей индустрии. Ты потерял доступ к сфере, которая тебе интересна. Твой друг, который остался на курсе, через месяц стал Junior QA.",
+            energy: 20,
+            color: "var(--text-muted)",
+            showFinalBtn: false
+        },
+        C: {
+            icon: "🚀",
+            title: "Level Up! Состояние потока",
+            text: "Отличная идея! Твой аналитический склад ума нам как раз нужен. Переводим тебя на трек Game Analyst. Твоя эффективность выросла в 3 раза, ты нашел свою «скрытую роль» под водой айсберга!",
+            energy: 100,
+            color: "var(--accent-green)",
+            showFinalBtn: true
+        }
+    };
+
+    // DOM Elements
+    const scenarioScreen = document.getElementById('scenario-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const energyBar = document.getElementById('energy-bar');
+    const energyText = document.getElementById('energy-text');
+    
+    const resultIcon = document.getElementById('result-icon');
+    const resultTitle = document.getElementById('result-title');
+    const resultText = document.getElementById('result-text');
+    const finalBtn = document.getElementById('final-btn');
+
+    function makeChoice(choice) {
+        const data = outcomes[choice];
+        
+        // Update stats
+        energyBar.style.width = data.energy + '%';
+        energyBar.style.backgroundColor = data.color;
+        energyText.innerText = data.energy + '%';
+
+        // Update result text
+        resultIcon.innerText = data.icon;
+        resultTitle.innerText = data.title;
+        resultTitle.style.color = data.color;
+        resultText.innerText = data.text;
+
+        // Toggle buttons
+        if (data.showFinalBtn) {
+            finalBtn.classList.remove('hidden');
+        } else {
+            finalBtn.classList.add('hidden');
+        }
+
+        // Switch screens
+        scenarioScreen.classList.add('hidden');
+        resultScreen.style.display = 'block';
+    }
+
+    function resetScenario() {
+        // Reset stats
+        energyBar.style.width = '50%';
+        energyBar.style.backgroundColor = 'var(--accent-blue)';
+        energyText.innerText = '50%';
+
+        // Switch screens
+        resultScreen.style.display = 'none';
+        scenarioScreen.classList.remove('hidden');
+    }
+</script>
+
+</body>
+</html>
